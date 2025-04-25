@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo:5.0
+    volumes:
+      - ./mongo_data:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=example
+    healthcheck:  # 👈 Wait for MongoDB to be ready
+      test: mongosh --eval "db.adminCommand('ping')"
+      interval: 5s
+      timeout: 30s
+      retries: 5
+
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./static/images:/app/static/images
+    environment:
+      - MONGO_URI=mongodb://root:example@mongo:27017/cognilium_database?authSource=admin
+    depends_on:
+      mongo:
+        condition: service_healthy  # 👈 Critical!
+    restart: unless-stopped  # 👈 Auto-recover on crashes

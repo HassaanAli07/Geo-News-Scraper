@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Geo News Scraper</title>
+</head>
+<body>
+    <h1>Scrape Geo News Articles</h1>
+    <form method="POST">
+        <input type="text" name="target_url" placeholder="Enter Geo Category URL" required>
+        <button type="submit">Scrape</button>
+    </form>
+
+    {% if urls %}
+        <h2>Extracted Article URLs</h2>
+        <ul>
+            {% for url in urls %}
+                <li><a href="{{ url }}" target="_blank">{{ url }}</a></li>
+            {% endfor %}
+        </ul>
+
+        <h2>Search for Article Details</h2>
+        <form method="POST" action="{{ url_for('index') }}">
+            <label for="article_url">Enter Article URL:</label>
+            <input type="text" id="article_url" name="article_url" required>
+            <button type="submit">Get Article Details</button>
+        </form>
+
+        {% if article_data %}
+            <hr>
+            <h3>Article Details</h3>
+            <p><strong>Title:</strong> {{ article_data.title }}</p>
+            <p><strong>Description:</strong> {{ article_data.description }}</p>
+            <p><strong>Date:</strong> {{ article_data.date }}</p>
+            <p><strong>URL:</strong> <a href="{{ article_data.url }}">{{ article_data.url }}</a></p>
+            {% if article_data.image %}
+                <img src="{{ url_for('static', filename=article_data.image.split('static/')[1]) }}" width="300" alt="Article Image">
+                <!-- <img src="{{ article_data.image }}" width="300" alt="Article Image"> -->
+            {% endif %}
+
+            <form method="POST" action="{{ url_for('index') }}" style="margin-top: 20px;">
+                <input type="hidden" name="article_url" value="{{ article_data.url }}">
+                <input type="hidden" name="summarize" value="1">
+                <button type="submit">Summarize this Article</button>
+            </form>
+            
+            {% if summary %}
+                <h4>Summary:</h4>
+                <p>{{ summary }}</p>
+            {% endif %}
+            
+        {% elif search_attempted %}
+            <p style="color: red;">Article not found in the database.</p>
+        {% endif %}
+    {% endif %}
+</body>
+</html>
